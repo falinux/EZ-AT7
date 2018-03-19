@@ -1,0 +1,43 @@
+OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
+OUTPUT_ARCH(arm)
+ENTRY(_start)
+
+MEMORY
+{
+  CODE  (rx) : ORIGIN = 0x00000000, LENGTH = 0x00010000
+  DATA  (rw) : ORIGIN = 0x00200000, LENGTH = 0x00004000
+  STACK (rw) : ORIGIN = 0x00210000, LENGTH = 0x00000000
+}
+
+SECTIONS
+{
+	. = 0x00000000;
+
+	. = ALIGN(4);
+	.text : { *(.text) } > CODE = 0
+
+	. = ALIGN(4);
+	.rodata : { *(.rodata) } > CODE
+
+	. = ALIGN(4);
+	_data_read_start = . ;
+
+	.data : AT(_data_read_start)
+	{
+		_data_write_start = . ;
+		*(.data)
+		*(.fastrun)
+	} > DATA
+	. = ALIGN(4);
+	_data_write_end = . ;
+
+	.got : { *(.got) } > DATA
+
+	. = ALIGN(4);
+	_bss_start = . ;
+	.bss : { *(.bss) } > DATA
+
+	. = ALIGN(4);
+	_bss_end = . ;
+}
+
